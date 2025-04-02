@@ -1,19 +1,20 @@
+// Jenkins Pipeline for automated package deployment to various instances
 pipeline {
     agent any
-
+    // Define parameters for user input during pipeline execution
     parameters {
         choice(
             name: 'INSTANCE_ALIAS',
-            choices: '''ACER QA 22R2
-Automation 22R2
-Dev 22R2
-Hyundai Dev 22R2
-Hyundai Training 22R2
-Maruti Training 22R2
-Restore 1
-Restore 2
-TATA-Training 22R2
-Temp-BuildTest 22R2''',
+            choices: '''Instance-A
+Instance-B
+Instance-C
+Instance-D
+Instance-E
+Instance-F
+Instance-G
+Instance-H
+Instance-I
+Instance-J''',
             description: 'Select the Acumatica instance'
         )
         string(
@@ -29,51 +30,51 @@ Arpitha K''',
             description: 'Select user to send mail to'
         )
     }
+    // Environment variables for instance URLs
+    // In a production environment, consider storing these in Jenkins credentials or configuration files
     environment {
-        TEMP_BUILD_URL = 'https://qa.readywire.com/temp22r2BuildTest'
-        TRAINING_URL = 'https://tatatraining22r2.readywire.com'
-        AUTO_URL = 'https://auto22r2.readywire.com'
-        HYUNDAI_URL = 'https://hyundaidev22r2.readywire.com'
-        HYUNDAI_TRAINING_URL = 'https://hyundaitraining22r2.readywire.com'
-        MARUTI_TRAINING_URL = 'https://msiltraining22r2.readywire.com'
-        DEV_URL = 'https://dev.readywire.com'
-        ACER_QA_URL = 'https://qa.readywire.com/maruti-acermotors'
-        RESTORE1_URL = 'https://restore1.readywire.com'
-        RESTORE2_URL = 'https://restore2.readywire.com'
+        INSTANCE_A_URL = 'https://instanceA.example.com'
+        INSTANCE_B_URL = 'https://instanceB.example.com'
+        INSTANCE_C_URL = 'https://instanceC.example.com'
+        INSTANCE_D_URL = 'https://instanceD.example.com'
+        INSTANCE_E_URL = 'https://instanceE.example.com'
+        INSTANCE_F_URL = 'https://instanceF.example.com'
+        INSTANCE_G_URL = 'https://instanceG.example.com'
+        INSTANCE_H_URL = 'https://instanceH.example.com'
+        INSTANCE_I_URL = 'https://instanceI.example.com'
+        INSTANCE_J_URL = 'https://instanceJ.example.com'
     }
 
     stages {
+        // Map the selected instance alias to the corresponding URL
         stage('Set URL') {
             steps {
                 script {
-                    if (env.INSTANCE_ALIAS == 'Temp-BuildTest 22R2') {
-                        env.SELECTED_URL = env.TEMP_BUILD_URL
-                    } else if (env.INSTANCE_ALIAS == 'TATA-Training 22R2') {
-                        env.SELECTED_URL = env.TRAINING_URL
-                    } else if (env.INSTANCE_ALIAS == 'Automation 22R2') {
-                        env.SELECTED_URL = env.AUTO_URL
-                    } else if (env.INSTANCE_ALIAS == 'Hyundai Dev 22R2') {
-                        env.SELECTED_URL = env.HYUNDAI_URL
-                    } else if (env.INSTANCE_ALIAS == 'Hyundai Training 22R2') {
-                        env.SELECTED_URL = env.HYUNDAI_TRAINING_URL
-                    } else if (env.INSTANCE_ALIAS == 'Maruti Training 22R2') {
-                        env.SELECTED_URL = env.MARUTI_TRAINING_URL
-                    } else if (env.INSTANCE_ALIAS == 'Dev 22R2') {
-                        env.SELECTED_URL = env.DEV_URL
-                    }else if (env.INSTANCE_ALIAS == 'ACER QA 22R2') {
-                        env.SELECTED_URL = env.ACER_QA_URL
-                    }else if (env.INSTANCE_ALIAS == 'Restore 1') {
-                        env.SELECTED_URL = env.RESTORE1_URL
-                    }else if (env.INSTANCE_ALIAS == 'Restore 2') {
-                        env.SELECTED_URL = env.RESTORE2_URL
-                    }else {
-                        error('Invalid Selection!')
+                    def instanceUrlMap = [
+                        'Instance-A': env.INSTANCE_A_URL,
+                        'Instance-B': env.INSTANCE_B_URL,
+                        'Instance-C': env.INSTANCE_C_URL,
+                        'Instance-D': env.INSTANCE_D_URL,
+                        'Instance-E': env.INSTANCE_E_URL,
+                        'Instance-F': env.INSTANCE_F_URL,
+                        'Instance-G': env.INSTANCE_G_URL,
+                        'Instance-H': env.INSTANCE_H_URL,
+                        'Instance-I': env.INSTANCE_I_URL,
+                        'Instance-J': env.INSTANCE_J_URL
+                    ]
+                    // Set the selected URL based on the chosen instance alias
+                    env.SELECTED_URL = instanceUrlMap[env.INSTANCE_ALIAS]
+                    if (env.SELECTED_URL == null) {
+                        error('Invalid Instance Selection!')
                     }
+                    
                     echo "Selected URL: ${env.SELECTED_URL}"
 
+                    // Define package directory path based on the package date parameter
                     def packagePath = "C:\\Backups\\pkg-backups\\${params.PACKAGE_DATE}"
                     echo "Package Directory: ${packagePath}"
-
+                    
+                    //List files in the package directory for verification, one can skip this part as this was added to have logs of file which are present.
                     def dirListing = bat(script: """@echo off
 setlocal enabledelayedexpansion
 set count=1
@@ -83,20 +84,19 @@ set /a count=!count!+1)""", returnStdout: true).trim()
                 }
             }
         }
-
+        
+        // Configure email notification settings based on user selection
         stage('Set Email') {
             steps {
                 script {
-                    if (params.NOTIFY_USER == 'Do not notify') {
-                        env.NOTIFICATION_EMAIL = ''
-                        env.SHOULD_NOTIFY = 'false'
-                    } else if (params.NOTIFY_USER == 'Arpitha K') {
-                        env.NOTIFICATION_EMAIL = 'arpithak@readywire.com'
-                        env.SHOULD_NOTIFY = 'true'
-                    } else {
-                        env.NOTIFICATION_EMAIL = 'nikhils@readywire.com'
-                        env.SHOULD_NOTIFY = 'true'
-                    }
+                    // Map notification user selection to email addresses
+                    def emailMap = [
+                        'Do not notify': '',
+                        'User1': 'user1@example.com',
+                        'User2': 'user2@example.com'
+                    ]
+                    env.NOTIFICATION_EMAIL = emailMap[params.NOTIFY_USER]
+                    env.SHOULD_NOTIFY = (params.NOTIFY_USER != 'Do not notify') ? 'true' : 'false'
                 }
             }
         }
@@ -116,14 +116,18 @@ set /a count=!count!+1)""", returnStdout: true).trim()
                     """)
             }
         }
-
+        
+        // Deploy customizatino packages to the selected instance:
         stage('Deploy Packages') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'pkgadmin', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    bat '@echo off && cd "C:/Jenkins-Build" && "C:\\Program Files\\Python313\\python.exe" customizationPublish.py --instance-url "' + env.SELECTED_URL + '" --username "%USERNAME%" --password "%PASSWORD%" --package-date "' + params.PACKAGE_DATE.trim() + '"'
+                // Use Jenkins credentials to securely access deployment credentials
+                withCredentials([usernamePassword(credentialsId: 'deployment-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    // Execute deployment script with required parameters
+                    bat '@echo off && cd "C:/Deployment-Scripts" && "C:\\Program Files\\Python311\\python.exe" deployPackage.py --instance-url "' + env.SELECTED_URL + '" --username "%USERNAME%" --password "%PASSWORD%" --package-date "' + params.PACKAGE_DATE.trim() + '"'
                 }
             }
         }
+        // Send notification email when deployment completes
         stage('Publish Finish Notification') {
             when {
                 expression { env.SHOULD_NOTIFY == 'true' }
@@ -141,10 +145,13 @@ set /a count=!count!+1)""", returnStdout: true).trim()
             }
         }
     }
+    // Post-deployment actions
     post {
+        // Always clean the workspace after the pipeline completes
         always {
             cleanWs()
         }
+        // Actions to take on successful deployment
         success {
             echo 'Customization publish completed successfully!'
             emailext(
@@ -161,6 +168,7 @@ set /a count=!count!+1)""", returnStdout: true).trim()
                 """
             )
         }
+        // Actions to take on deployment failure
         failure {
             echo 'Customization Publish failed! Check the logs for details.'
             emailext(
