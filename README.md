@@ -13,7 +13,7 @@ This solution allows for consistent, repeatable deployments across multiple Acum
 
 ## 📂 Table of Contents
 
-- [Prerequisites](#prerequisites)
+- [Prerequisites](#Prerequisites)
 - [Directory Structure](#directory-structure)
 - [Jenkins Pipeline](#jenkins-pipeline)
   - [Parameters](#parameters)
