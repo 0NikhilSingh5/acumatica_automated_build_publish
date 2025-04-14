@@ -10,23 +10,6 @@ The deployment tool consists of two main components:
 This solution allows for consistent, repeatable deployments across multiple Acumatica instances while providing notifications to stakeholders. 🚀
 
 ---
-
-## 📂 Table of Contents
-
-* [🛠 Prerequisites](#-prerequisites)
-- [Directory Structure](#directory-structure)
-- [Jenkins Pipeline](#jenkins-pipeline)
-  - [Parameters](#parameters)
-  - [Setup](#setup)
-  - [Usage](#usage)
-- [Python Deployment Script](#python-deployment-script)
-  - [Features](#features)
-  - [Arguments](#arguments)
-  - [Customization](#customization)
-- [Deployment Process](#deployment-process)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-
 ## 🛠 Prerequisites
 
 - **Jenkins Server** with:
